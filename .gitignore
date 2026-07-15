@@ -1,0 +1,9 @@
+# macOS system files
+.DS_Store
+
+# PlatformIO build and workspace directories
+firmware/.pio/
+firmware/.vscode/
+
+# Secrets and private certificates (DO NOT UPLOAD)
+firmware/include/secrets.h
