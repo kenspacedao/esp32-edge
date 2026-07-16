@@ -28,7 +28,7 @@ aws dynamodb create-table \
 Local validation:
 
 ```sh
-pip install pytest boto3
+pip install -r aws/lambda/requirements-dev.txt
 pytest aws/lambda/tests
 ```
 

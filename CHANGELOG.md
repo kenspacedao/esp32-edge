@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- GitHub Actions CI (`.github/workflows/ci.yml`): PlatformIO firmware build
+  (with placeholder `secrets.h`) and Lambda pytest suite on every push and
+  pull request, with PlatformIO package caching.
+- `aws/lambda/requirements-dev.txt` for local/CI test dependencies.
+
 ## [0.1.0] - 2026-07-15
 
 ### Added
