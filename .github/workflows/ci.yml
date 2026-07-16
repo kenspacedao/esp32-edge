@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  firmware:
+    name: Firmware build (PlatformIO)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: pio-${{ runner.os }}-${{ hashFiles('firmware/platformio.ini') }}
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+
+      - name: Create placeholder secrets.h
+        run: cp firmware/include/secrets.h.example firmware/include/secrets.h
+
+      - name: Build firmware
+        run: pio run -d firmware
+
+  lambda:
+    name: Lambda tests (pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: aws/lambda/requirements-dev.txt
+
+      - name: Install dependencies
+        run: pip install -r aws/lambda/requirements-dev.txt
+
+      - name: Run tests
+        run: pytest aws/lambda/tests -v
