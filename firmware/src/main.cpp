@@ -4,6 +4,20 @@
 #include <Arduino.h>
 #include <DHT.h>
 #include <Wire.h>
+#include <WiFiClientSecure.h>
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
+#include "secrets.h"
+
+// Define MQTT Publish topic
+#define AWS_IOT_PUBLISH_TOPIC "esp32/telemetry"
+
+WiFiClientSecure net = WiFiClientSecure();
+PubSubClient client(net);
+
+// Asynchronous timing for cloud publishing
+unsigned long lastPublishTime = 0;
+const unsigned long publishInterval = 10000; // Publish telemetry every 10 seconds
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -101,6 +115,81 @@ void updateDisplay(float temp, float hum, int pm25_val, int pm10_val) {
   display.display();
 }
 
+void connectAWS() {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  Serial.println(F("Connecting to Wi-Fi..."));
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println(F("\nWi-Fi Connected!"));
+
+  // Configure WiFiClientSecure to use the AWS IoT certificates
+  net.setCACert(AWS_CERT_CA);
+  net.setCertificate(AWS_CERT_CRT);
+  net.setPrivateKey(AWS_CERT_PRIVATE);
+
+  // Initialize the MQTT client
+  client.setServer(AWS_IOT_ENDPOINT, 8883);
+
+  Serial.println(F("Connecting to AWS IoT Core..."));
+  while (!client.connect(THINGNAME)) {
+    Serial.print(".");
+    delay(1000);
+  }
+
+  if (!client.connected()) {
+    Serial.println(F("\nAWS IoT Connection Failed!"));
+    return;
+  }
+
+  Serial.println(F("\nAWS IoT Connected!"));
+}
+
+void reconnectAWS() {
+  // Non-blocking reconnect: attempt once per loop call if disconnected
+  if (!client.connected()) {
+    Serial.println(F("MQTT disconnected. Reconnecting..."));
+    if (client.connect(THINGNAME)) {
+      Serial.println(F("MQTT reconnected."));
+    }
+  }
+}
+
+void publishTelemetry() {
+  JsonDocument doc;
+
+  // Populate data
+  doc["device_id"] = THINGNAME;
+  doc["timestamp"] = millis(); // Local uptime relative offset
+  
+  if (isnan(temperature)) {
+    doc["temperature"] = nullptr; // JSON null if sensor fails
+  } else {
+    doc["temperature"] = temperature;
+  }
+  
+  if (isnan(humidity)) {
+    doc["humidity"] = nullptr;
+  } else {
+    doc["humidity"] = humidity;
+  }
+
+  doc["pm25"] = pmValid ? pm25 : -1;
+  doc["pm10"] = pmValid ? pm10 : -1;
+  doc["status"] = (isnan(temperature) || !pmValid) ? "warning" : "ok";
+
+  char jsonBuffer[256];
+  serializeJson(doc, jsonBuffer);
+
+  Serial.print(F("Publishing: "));
+  Serial.println(jsonBuffer);
+  
+  client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer);
+}
+
 void setup() {
   Serial.begin(115200);
   delay(500); // Stabilize serial connection
@@ -135,11 +224,17 @@ void setup() {
   display.clearDisplay();
   display.display();
 
+  connectAWS(); // Connect to Wi-Fi and AWS IoT Core
+
   Serial.println(F("Initialization complete."));
 }
 
 void loop() {
   unsigned long currentMillis = millis();
+
+  // Maintain the MQTT connection and handle reconnects
+  reconnectAWS();
+  client.loop();
 
   // Asynchronously read the PMS5003 PM2.5 sensor
   PM25_AQI_Data data;
@@ -189,5 +284,11 @@ void loop() {
       // Refresh the OLED screen with the latest values
       updateDisplay(temperature, humidity, pmValid ? pm25 : -1, pmValid ? pm10 : -1);
     }
+  }
+
+  // Non-blocking cloud publish timer (every 10 seconds)
+  if (client.connected() && (currentMillis - lastPublishTime >= publishInterval)) {
+    lastPublishTime = currentMillis;
+    publishTelemetry();
   }
 }
