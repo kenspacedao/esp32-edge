@@ -47,7 +47,6 @@ Ensure you have the following components wired before deploying the firmware:
 ## 📁 Repository Structure
 
 ```text
-├── .agents/                 # AI Assistant/Antigravity configuration
 ├── firmware/                # PlatformIO C++ Project
 │   ├── include/
 │   │   └── secrets.h        # WiFi & AWS certificates (Git ignored)
