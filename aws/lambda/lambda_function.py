@@ -2,6 +2,7 @@ import json
 import logging
 import boto3
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 # Configure structured CloudWatch logging
 logger = logging.getLogger()
@@ -30,8 +31,8 @@ def lambda_handler(event, context):
         if not device_id:
             raise ValueError("Missing required field: 'device_id'")
 
-        # Generate a server-side ISO timestamp for the record
-        timestamp = datetime.now(timezone.utc).isoformat()
+        # Generate a server-side US-style timestamp in Eastern Time
+        timestamp = datetime.now(ZoneInfo('America/New_York')).strftime("%m/%d/%Y %I:%M:%S %p %Z")
 
         # Build the DynamoDB item
         item = {

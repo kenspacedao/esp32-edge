@@ -6,7 +6,7 @@
             "Action": [
                 "dynamodb:PutItem"
             ],
-            "Resource": "arn:aws:dynamodb:REGION:ACCOUNT_ID:table/ESP32Telemetry"
+            "Resource": "arn:aws:dynamodb:us-east-1:613608381344:table/ESP32Telemetry"
         },
         {
             "Effect": "Allow",
@@ -15,7 +15,7 @@
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
             ],
-            "Resource": "arn:aws:logs:REGION:ACCOUNT_ID:*"
+            "Resource": "arn:aws:logs:us-east-1:613608381344:*"
         }
     ]
 }
