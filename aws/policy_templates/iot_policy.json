@@ -4,12 +4,12 @@
         {
             "Effect": "Allow",
             "Action": "iot:Connect",
-            "Resource": "arn:aws:iot:REGION:ACCOUNT_ID:client/ESP32_Edge_Monitor"
+            "Resource": "arn:aws:iot:us-east-1:613608381344:client/ESP32_Edge_Monitor"
         },
         {
             "Effect": "Allow",
             "Action": "iot:Publish",
-            "Resource": "arn:aws:iot:REGION:ACCOUNT_ID:topic/esp32/telemetry"
+            "Resource": "arn:aws:iot:us-east-1:613608381344:topic/esp32/telemetry"
         }
     ]
 }
