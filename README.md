@@ -4,7 +4,7 @@ An ESP32-based edge-to-cloud environmental monitoring system. It samples ambient
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 *   **Asynchronous Sensor Reads:** Telemetry sampling and OLED refresh routines run independently of network latency using non-blocking (`millis()`) loops.
 *   **Edge Telemetry:** Samples climate metrics via a DHT11 sensor and fine particulate matter (PM2.5/PM10) via a PMS5003 serial dust sensor.
@@ -14,7 +14,7 @@ An ESP32-based edge-to-cloud environmental monitoring system. It samples ambient
 
 ---
 
-## 🛠️ Hardware Bill of Materials (BOM)
+## Hardware Bill of Materials (BOM)
 
 Ensure you have the following components wired before deploying the firmware:
 
@@ -31,20 +31,20 @@ Ensure you have the following components wired before deploying the firmware:
 
 ---
 
-## 🔌 Default Pin Configuration
+## Default Pin Configuration
 
 *   **I2C Interface (OLED Display):**
-    *   `SDA` ➡️ Pin 21
-    *   `SCL` ➡️ Pin 22
+    *   `SDA` -> Pin 21
+    *   `SCL` -> Pin 22
 *   **UART2 Interface (PMS5003 Sensor):**
-    *   `RX2` ➡️ Pin 16
-    *   `TX2` ➡️ Pin 17
+    *   `RX2` -> Pin 16
+    *   `TX2` -> Pin 17
 *   **DHT11 Sensor Data:**
     *   Connect to a free digital input pin (e.g., Pin 4 or similar, configurable in code). Make sure to pull up the data line with a 10kΩ resistor if using a 3-pin bare sensor.
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 ├── firmware/                # PlatformIO C++ Project
@@ -63,7 +63,7 @@ Ensure you have the following components wired before deploying the firmware:
 
 ---
 
-## ⚡ Setup & Deployment
+## Setup & Deployment
 
 ### 1. Firmware Setup (PlatformIO)
 1. Open the `/firmware` directory in VS Code with the PlatformIO extension installed.
@@ -93,7 +93,7 @@ Ensure you have the following components wired before deploying the firmware:
 
 ---
 
-## 🔒 Security Guidelines & Rules
+## Security Guidelines & Rules
 
 *   **Secrets Management:** Never upload `secrets.h` or any credentials to public repositories. Ensure they remain ignored by the root `.gitignore` file.
 *   **Non-Blocking Loops:** Do not use `delay()` in your code, as it will block incoming serial bytes from the PMS5003 and cause buffer overflows or data loss. Always use `millis()`-based task scheduling.
